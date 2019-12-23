@@ -1,0 +1,7 @@
+name: dropletutils
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - nextflow
