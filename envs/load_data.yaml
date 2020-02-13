@@ -1,8 +1,8 @@
-name: data_downloading
+name: data_import
 channels:
   - bioconda
   - conda-forge
   - defaults
   - ebi-gene-expression-group
 dependencies:
-  - atlas-data-import=0.0.2
+  - atlas-data-import=0.0.3

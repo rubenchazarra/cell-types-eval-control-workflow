@@ -3,11 +3,12 @@
 // Meta-workflow that controls execution of steps in cell type 
 // prediction tools evaluation framework
 
-
-//TODO: add metadata files for both datasets
-
 // extract reference and query data
 if(params.data_download.run == "True"){
+    query_data = params.data_download.query_output_dir
+    query_n_clust = params.data_download.query_num_clust.toString()
+    query_markers = "marker_genes_" + query_n_clust + ".tsv"
+
     process fetch_query_data{
         publishDir "${baseDir}/data", mode: 'copy'
         conda 'envs/load_data.yaml'
@@ -17,17 +18,30 @@ if(params.data_download.run == "True"){
         memory { 16.GB * task.attempt }
 
         output:
-            file("query_10X_dir") into QUERY_10X_DIR 
+            file("${query_data}/query_10x_data") into QUERY_10X_DIR
+            file("${query_data}/query_sdrf.txt") into QUERY_SDRF
+            file("${query_data}/query_${query_markers}") into QUERY_MARKERS
 
         """
-        get_input_data.R\
-                --data-type "query"\
-                --mat-url ${params.data_download.query_matrix_url}\
-                --barcodes-url ${params.data_download.query_barcodes_url}\
-                --genes-url ${params.data_download.query_genes_url}\
-                --output-10x-dir query_10X_dir
+        get_experiment_data.R\
+                --accesssion-code ${params.data_download.query_acc_code}\
+                --expr-data-type ${params.data_download.expr_data_type}\
+                --normalisation-method ${params.data_download.normalisation_method}\
+                --output-dir-name ${params.data_download.query_output_dir}\
+                --get-sdrf\
+                --get-marker-genes\
+                --number-of-clusters ${params.data_download.query_num_clust}
+
+        # rename files to avoid name collisions in subsequent processes
+        mv ${query_data}/10x_data ${query_data}/query_10x_data
+        mv ${query_data}/sdrf.txt ${query_data}/query_sdrf.txt
+        mv ${query_data}/${query_markers} ${query_data}/query_${query_markers}
         """
     }
+    ref_data = params.data_download.ref_output_dir
+    ref_n_clust = params.data_download.ref_num_clust.toString()
+    ref_markers = "marker_genes_" + ref_n_clust + ".tsv"
+
     process fetch_ref_data{
         publishDir "${baseDir}/data", mode: 'copy'
         conda 'envs/load_data.yaml'
@@ -37,19 +51,25 @@ if(params.data_download.run == "True"){
         memory { 16.GB * task.attempt }
 
         output:
-            file("reference_10X_dir") into REFERENCE_10X_DIR 
-            file("ref_metadata.txt") into REFERENCE_METADATA
-            file("ref_marker_genes.txt") into REF_MARKER_GENES
+            file("${ref_data}/ref_10x_data") into REF_10X_DIR
+            file("${ref_data}/ref_sdrf.txt") into REF_SDRF
+            file("${ref_data}/ref_${ref_markers}") into REF_MARKERS
 
         """
-        get_input_data.R\
-                --data-type "reference"\
-                --mat-url ${params.data_download.reference_mat_url}\
-                --barcodes-url ${params.data_download.reference_barcodes_url}\
-                --genes-url ${params.data_download.reference_genes_url}\
-                --ref-metadata ${params.data_download.reference_metadata}\
-                --marker-genes-file ${params.data_download.marker_genes_file}\
-                --output-10x-dir reference_10X_dir
+        get_experiment_data.R\
+                --accesssion-code ${params.data_download.ref_acc_code}\
+                --expr-data-type ${params.data_download.expr_data_type}\
+                --normalisation-method ${params.data_download.normalisation_method}\
+                --output-dir-name ${params.data_download.ref_output_dir}\
+                --get-sdrf\
+                --get-marker-genes\
+                --number-of-clusters ${params.data_download.ref_num_clust}
+
+        # rename files to avoid name collisions in subsequent processes
+        mv ${ref_data}/10x_data ${ref_data}/ref_10x_data
+        mv ${ref_data}/sdrf.txt ${ref_data}/ref_sdrf.txt
+        mv ${ref_data}/${ref_markers} ${ref_data}/ref_${ref_markers}
+
         """
     }
 }
@@ -65,9 +85,9 @@ if(params.garnett.run == "True"){
         memory { 16.GB * task.attempt }
         
         input:
-            file(reference_10X_dir) from REFERENCE_10X_DIR
+            file(reference_10X_dir) from REF_10X_DIR
             file(query_10X_dir) from QUERY_10X_DIR
-            file(ref_marker_genes) from REF_MARKER_GENES
+            file(ref_marker_genes) from REF_MARKERS
 
         output:
              file("garnett_output.txt") into GARNETT_OUTPUT
@@ -106,9 +126,9 @@ if(params.scmap_cell.run == "True"){
         memory { 16.GB * task.attempt }
 
         input:
-            file(reference_10X_dir) from REFERENCE_10X_DIR
+            file(reference_10X_dir) from REF_10X_DIR
             file(query_10X_dir) from QUERY_10X_DIR
-            file(ref_metadata) from REFERENCE_METADATA
+            file(ref_metadata) from REF_SDRF
 
         output: 
             file("scmap-cell_output.txt") into SCMAP_CELL_OUTPUT
@@ -147,9 +167,9 @@ if(params.scmap_cluster.run == "True"){
         memory { 16.GB * task.attempt }
 
         input:
-            file(reference_10X_dir) from REFERENCE_10X_DIR
+            file(reference_10X_dir) from REF_10X_DIR
             file(query_10X_dir) from QUERY_10X_DIR
-            file(ref_metadata) from REFERENCE_METADATA
+            file(ref_metadata) from REF_SDRF
 
         output:
             file("scmap-cluster_output.txt") into SCMAP_CLUST_OUTPUT
@@ -187,9 +207,9 @@ if(params.scpred.run == "True"){
         memory { 16.GB * task.attempt }
         
         input:
-            file(reference_10X_dir) from REFERENCE_10X_DIR
+            file(reference_10X_dir) from REF_10X_DIR
             file(query_10X_dir) from QUERY_10X_DIR
-            file(ref_metadata) from REFERENCE_METADATA
+            file(ref_metadata) from REF_SDRF
 
         output:
             file("scpred_output.txt") into SCPRED_OUTPUT
@@ -256,10 +276,9 @@ if(params.label_analysis.run == "True"){
 
         input:
             file(tool_outputs_dir) from COMBINED_RESULTS_DIR
-            file(ref_lab_file) from REFERENCE_METADATA
+            file(ref_lab_file) from REF_SDRF
 
         output:
-            file("${params.label_analysis.cell_anno_table}") into CELL_ANNO_TABLE
             file("${params.label_analysis.tool_perf_table}") into TOOL_PERF_TABLE
             file("${params.label_analysis.tool_table_pvals}") into TOOL_TABLE_PVALS
 
