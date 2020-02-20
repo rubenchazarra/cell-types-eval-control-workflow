@@ -7,7 +7,7 @@ A meta-workflow for evaluation of multiple scRNAseq cell type classification too
 
 Schematic representation of the workflow is shown below:
 
-![](https://github.com/ebi-gene-expression-group/cell-types-control-workflow/blob/add_zooma_mapping/control_pipeline.png)
+![](https://github.com/ebi-gene-expression-group/cell-types-control-workflow/blob/develop/control_pipeline.png)
 
 Rounded blocks represent processes or stand-alone pipelines, whereas rectangles represent output tables. Note that for each tool, independent pipeline is run, and additional tools can be easily incorporated if necessary. Each workflow/process are run in isolated environment and in parallel (when run on compute cluster).  
 
