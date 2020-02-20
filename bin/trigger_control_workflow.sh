@@ -15,4 +15,4 @@ popd > /dev/null
 
 
 # run nextflow command 
-nextflow run main.nf -profile cluster 
+nextflow run $EVAL_WORKFLOW_ROOT/main.nf -profile cluster 
