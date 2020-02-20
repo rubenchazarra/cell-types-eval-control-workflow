@@ -19,7 +19,7 @@ if(params.data_download.run == "True"){
 
         output:
             file("${query_data}/query_10x_data") into QUERY_10X_DIR
-            file("${query_data}/query_sdrf.txt") into QUERY_SDRF
+            file("${query_data}/query_sdrf.txt") into CONDENSED_SDRF_QUERY
             file("${query_data}/query_${query_markers}") into QUERY_MARKERS
 
         """
@@ -28,19 +28,37 @@ if(params.data_download.run == "True"){
                 --expr-data-type ${params.data_download.expr_data_type}\
                 --normalisation-method ${params.data_download.normalisation_method}\
                 --output-dir-name ${params.data_download.query_output_dir}\
-                --get-sdrf\
+                --get-condensed-sdrf\
                 --get-marker-genes\
                 --number-of-clusters ${params.data_download.query_num_clust}
 
         # rename files to avoid name collisions in subsequent processes
         mv ${query_data}/10x_data ${query_data}/query_10x_data
-        mv ${query_data}/sdrf.txt ${query_data}/query_sdrf.txt
+        mv ${query_data}/condensed-sdrf.tsv ${query_data}/query_sdrf.txt
         mv ${query_data}/${query_markers} ${query_data}/query_${query_markers}
         """
     }
     ref_data = params.data_download.ref_output_dir
     ref_n_clust = params.data_download.ref_num_clust.toString()
     ref_markers = "marker_genes_" + ref_n_clust + ".tsv"
+
+    // condensed sdrf files need 'un-melting' 
+    process unmelt_sdrf_query {
+        conda 'envs/exp_metadata.yaml'
+        input:
+            file(condensed_sdrf) from CONDENSED_SDRF_QUERY
+
+        output:
+            file("query_metadata.tsv") into UNMELTED_SDRF_QUERY
+
+        """
+        unmelt_condensed.R\
+                -i ${condensed_sdrf}\
+                -o query_metadata.tsv\
+                --retain-types\
+                --has-ontology                 
+        """
+    }
 
     process fetch_ref_data{
         publishDir "${baseDir}/data", mode: 'copy'
@@ -52,7 +70,7 @@ if(params.data_download.run == "True"){
 
         output:
             file("${ref_data}/ref_10x_data") into REF_10X_DIR
-            file("${ref_data}/ref_sdrf.txt") into REF_SDRF
+            file("${ref_data}/ref_sdrf.txt") into CONDENSED_SDRF_REF
             file("${ref_data}/ref_${ref_markers}") into REF_MARKERS
 
         """
@@ -61,15 +79,32 @@ if(params.data_download.run == "True"){
                 --expr-data-type ${params.data_download.expr_data_type}\
                 --normalisation-method ${params.data_download.normalisation_method}\
                 --output-dir-name ${params.data_download.ref_output_dir}\
-                --get-sdrf\
+                --get-condensed-sdrf\
                 --get-marker-genes\
                 --number-of-clusters ${params.data_download.ref_num_clust}
 
         # rename files to avoid name collisions in subsequent processes
         mv ${ref_data}/10x_data ${ref_data}/ref_10x_data
-        mv ${ref_data}/sdrf.txt ${ref_data}/ref_sdrf.txt
+        mv ${ref_data}/condensed-sdrf.tsv ${ref_data}/ref_sdrf.txt
         mv ${ref_data}/${ref_markers} ${ref_data}/ref_${ref_markers}
 
+        """
+    }
+    
+    process unmelt_sdrf_ref {
+        conda 'envs/exp_metadata.yaml'
+        input:
+            file(condensed_sdrf) from CONDENSED_SDRF_REF
+
+        output:
+            file("ref_sdrf_proc.tsv") into UNMELT_SDRF_REF
+
+        """
+        unmelt_condensed.R\
+                -i ${condensed_sdrf}\
+                -o ref_sdrf_proc.tsv\
+                --retain-types\
+                --has-ontology                 
         """
     }
 }
@@ -128,7 +163,7 @@ if(params.scmap_cell.run == "True"){
         input:
             file(reference_10X_dir) from REF_10X_DIR
             file(query_10X_dir) from QUERY_10X_DIR
-            file(ref_metadata) from REF_SDRF
+            file(ref_metadata) from UNMELT_SDRF_REF
 
         output: 
             file("scmap-cell_output.txt") into SCMAP_CELL_OUTPUT
@@ -169,7 +204,7 @@ if(params.scmap_cluster.run == "True"){
         input:
             file(reference_10X_dir) from REF_10X_DIR
             file(query_10X_dir) from QUERY_10X_DIR
-            file(ref_metadata) from REF_SDRF
+            file(ref_metadata) from UNMELT_SDRF_REF
 
         output:
             file("scmap-cluster_output.txt") into SCMAP_CLUST_OUTPUT
@@ -180,6 +215,7 @@ if(params.scmap_cluster.run == "True"){
         nextflow run $SCMAP_GIT\
                             -r $SCMAP_GIT_BRANCH\
                             --results_dir \$RESULTS_DIR\
+                            -latest\
                             --projection_method ${params.scmap_cluster.projection_method}\
                             --query_10x_dir ${query_10X_dir}\
                             --reference_10x_dir ${reference_10X_dir}\
@@ -209,7 +245,7 @@ if(params.scpred.run == "True"){
         input:
             file(reference_10X_dir) from REF_10X_DIR
             file(query_10X_dir) from QUERY_10X_DIR
-            file(ref_metadata) from REF_SDRF
+            file(ref_metadata) from UNMELT_SDRF_REF
 
         output:
             file("scpred_output.txt") into SCPRED_OUTPUT
@@ -221,6 +257,7 @@ if(params.scpred.run == "True"){
                             -r $SCPRED_GIT_BRANCH\
                             --results_dir \$RESULTS_DIR\
                             --method ${params.scpred.method}\
+                            -latest\
                             --training_10x_dir ${reference_10X_dir}\
                             --prediction_10x_dir ${query_10X_dir}\
                             --metadata_file ${ref_metadata}\
@@ -276,7 +313,8 @@ if(params.label_analysis.run == "True"){
 
         input:
             file(tool_outputs_dir) from COMBINED_RESULTS_DIR
-            file(ref_lab_file) from REF_SDRF
+            // NB: use query labels as 'true' labels; ref labels were used for model training
+            file(query_lab_file) from UNMELTED_SDRF_QUERY
 
         output:
             file("${params.label_analysis.tool_perf_table}") into TOOL_PERF_TABLE
@@ -289,7 +327,7 @@ if(params.label_analysis.run == "True"){
                             -r $LABEL_ANALYSIS_GIT_BRANCH\
                             --results_dir \$RESULTS_DIR\
                             --input_dir ${tool_outputs_dir}\
-                            --ref_labels_file ${ref_lab_file}\
+                            --ref_labels_file ${query_lab_file}\
                             --tool_perf_table ${params.label_analysis.tool_perf_table}\
                             --cell_anno_table ${params.label_analysis.cell_anno_table}\
                             --tool_table_pvals ${params.label_analysis.tool_table_pvals}\
