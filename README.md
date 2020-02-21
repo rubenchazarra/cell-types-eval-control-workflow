@@ -33,7 +33,7 @@ conda activate nextflow
 conda install nextflow
 ```
 
-Before running pipeline, make sure you are within the `cell-types-eval--control-workflow` directory.
+Before running pipeline, make sure you are within the `cell-types-eval-control-workflow` directory.
 
 Then issue the following command:
 ```
