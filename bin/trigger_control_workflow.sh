@@ -4,7 +4,7 @@ cd $EVAL_WORKFLOW_ROOT
 
 # Clone or update the cell-types-eval-workflows repo containing submodules for individual pipelines
 if [ ! -d 'cell-types-eval-workflows' ]; then
-    git clone --recursive https://github.com/ebi-gene-expression-group/cell-types-eval-workflows
+    git clone --recursive https://github.com/ebi-gene-expression-group/cell-types-eval-workflows $EVAL_WORKFLOWS
 fi
 
 pushd cell-types-eval-workflows > /dev/null
