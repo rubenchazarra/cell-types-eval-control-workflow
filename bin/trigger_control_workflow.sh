@@ -8,11 +8,11 @@ if [ ! -d 'cell-types-eval-workflows' ]; then
 fi
 
 pushd cell-types-eval-workflows > /dev/null
-git checkout $EVAL_WORKFLOW_BRANCH > /dev/null
+git checkout $CONTROL_WORKFLOW_BRANCH > /dev/null
 git pull > /dev/null
 git submodule update > /dev/null
 popd > /dev/null
 
 
 # run nextflow command 
-nextflow run $EVAL_WORKFLOW_ROOT/main.nf -profile cluster 
+nextflow run $CONTROL_WORKFLOW_ROOT/main.nf -profile cluster 

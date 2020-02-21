@@ -130,8 +130,8 @@ if(params.garnett.run == "True"){
         """
         RESULTS_DIR=\$PWD
 
-        nextflow run $GARNETT_GIT\
-                            -r $GARNETT_GIT_BRANCH\
+        nextflow run $EVAL_WORKFLOWS/garnett-eval-workflow/main.nf\
+                            -profile cluster\
                             --results_dir \$RESULTS_DIR\
                             --ref_10x_dir ${reference_10X_dir}\
                             --query_10x_dir ${query_10X_dir}\
@@ -171,8 +171,8 @@ if(params.scmap_cell.run == "True"){
         """
         RESULTS_DIR=\$PWD    
 
-        nextflow run $SCMAP_GIT\
-                            -r $SCMAP_GIT_BRANCH\
+        nextflow run $EVAL_WORKFLOWS/scmap-eval-workflow/main.nf\
+                            -profile cluster\
                             --results_dir \$RESULTS_DIR\
                             --projection_method ${params.scmap_cell.projection_method}\
                             --query_10x_dir ${query_10X_dir}\
@@ -212,10 +212,9 @@ if(params.scmap_cluster.run == "True"){
         """
         RESULTS_DIR=\$PWD
 
-        nextflow run $SCMAP_GIT\
-                            -r $SCMAP_GIT_BRANCH\
+        nextflow run $EVAL_WORKFLOWS/scmap-eval-workflow/main.nf\
+                            -profile cluster\
                             --results_dir \$RESULTS_DIR\
-                            -latest\
                             --projection_method ${params.scmap_cluster.projection_method}\
                             --query_10x_dir ${query_10X_dir}\
                             --reference_10x_dir ${reference_10X_dir}\
@@ -253,8 +252,8 @@ if(params.scpred.run == "True"){
         """
         RESULTS_DIR=\$PWD
 
-        nextflow run $SCPRED_GIT\
-                            -r $SCPRED_GIT_BRANCH\
+        nextflow run $EVAL_WORKFLOWS/scpred-eval-workflow/main.nf\
+                            -profile cluster\
                             --results_dir \$RESULTS_DIR\
                             --method ${params.scpred.method}\
                             -latest\
@@ -323,8 +322,8 @@ if(params.label_analysis.run == "True"){
         """
         RESULTS_DIR=\$PWD 
 
-        nextflow run $LABEL_ANALYSIS_GIT\
-                            -r $LABEL_ANALYSIS_GIT_BRANCH\
+        nextflow run $EVAL_WORKFLOWS/label-analysis-eval-workflow\
+                            -profile cluster\
                             --results_dir \$RESULTS_DIR\
                             --input_dir ${tool_outputs_dir}\
                             --ref_labels_file ${query_lab_file}\
