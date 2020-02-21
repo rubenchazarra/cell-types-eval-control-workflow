@@ -31,13 +31,11 @@ Obviously, you will need Nextflow installed to run analyses. The best way to ins
 conda create --name nextflow
 conda activate nextflow
 conda install nextflow
-
-
-
 ```
-Before running pipeline, make sure you are within the `cell-types-control-workflow` directory.
 
-Then issue the following commands:
+Before running pipeline, make sure you are within the `cell-types-eval--control-workflow` directory.
+
+Then issue the following command:
 ```
 ./bin/fetch-tool-eval-workflows.sh
 ```
