@@ -9,9 +9,10 @@ if(params.data_download.run == "True"){
     query_n_clust = params.data_download.query_num_clust.toString()
     query_markers = "marker_genes_" + query_n_clust + ".tsv"
 
+    println("${baseDir}")
     process fetch_query_data{
         publishDir "${baseDir}/data", mode: 'copy'
-        conda 'envs/load_data.yaml'
+        conda "${baseDir}/envs/load_data.yaml"
 
         errorStrategy { task.exitStatus == 130 || task.exitStatus == 137  ? 'retry' : 'finish' }   
         maxRetries 5
@@ -44,7 +45,7 @@ if(params.data_download.run == "True"){
 
     // condensed sdrf files need 'un-melting' 
     process unmelt_sdrf_query {
-        conda 'envs/exp_metadata.yaml'
+        conda "${baseDir}/envs/exp_metadata.yaml"
         input:
             file(condensed_sdrf) from CONDENSED_SDRF_QUERY
 
@@ -62,7 +63,7 @@ if(params.data_download.run == "True"){
 
     process fetch_ref_data{
         publishDir "${baseDir}/data", mode: 'copy'
-        conda 'envs/load_data.yaml'
+        conda "${baseDir}/envs/load_data.yaml"
 
         errorStrategy { task.exitStatus == 130 || task.exitStatus == 137  ? 'retry' : 'finish' }   
         maxRetries 5
@@ -92,7 +93,7 @@ if(params.data_download.run == "True"){
     }
     
     process unmelt_sdrf_ref {
-        conda 'envs/exp_metadata.yaml'
+        conda "${baseDir}/envs/exp_metadata.yaml"
         input:
             file(condensed_sdrf) from CONDENSED_SDRF_REF
 
@@ -322,7 +323,7 @@ if(params.label_analysis.run == "True"){
         """
         RESULTS_DIR=\$PWD 
 
-        nextflow run $EVAL_WORKFLOWS/label-analysis-eval-workflow\
+        nextflow run $EVAL_WORKFLOWS/label-analysis-eval-workflow/main.nf\
                             -profile cluster\
                             --results_dir \$RESULTS_DIR\
                             --input_dir ${tool_outputs_dir}\

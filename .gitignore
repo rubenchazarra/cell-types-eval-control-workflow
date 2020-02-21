@@ -1,4 +1,5 @@
 .nextflow*
 data/*
 work/*
+cell-types-eval-workflows/
 .DS_Store
