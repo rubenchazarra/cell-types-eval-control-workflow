@@ -9,7 +9,6 @@ if(params.data_download.run == "True"){
     query_n_clust = params.data_download.query_num_clust.toString()
     query_markers = "marker_genes_" + query_n_clust + ".tsv"
 
-    println("${baseDir}")
     process fetch_query_data{
         publishDir "${baseDir}/data", mode: 'copy'
         conda "${baseDir}/envs/load_data.yaml"

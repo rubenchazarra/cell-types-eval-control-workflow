@@ -13,6 +13,3 @@ git checkout $CONTROL_WORKFLOW_BRANCH > /dev/null
 git pull > /dev/null
 git submodule update > /dev/null
 popd > /dev/null
-
-# run nextflow command 
-#nextflow run $CONTROL_WORKFLOW_ROOT/main.nf -profile cluster 

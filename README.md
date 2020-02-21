@@ -31,15 +31,24 @@ Obviously, you will need Nextflow installed to run analyses. The best way to ins
 conda create --name nextflow
 conda activate nextflow
 conda install nextflow
+
+
+
 ```
-To run the pipeline, make sure you are within the `cell-types-control-workflow`directory. Then issue the following command:
+Before running pipeline, make sure you are within the `cell-types-control-workflow` directory.
+
+Then issue the following commands:
 ```
-nextflow run main.nf
+./bin/fetch-tool-eval-workflows.sh
 ```
-To enable parallel execution, add `--profile cluster` parameter to the command. 
+This will pull the latest version of repo containing individual pipelines from GitHub. To trigger pipeline exectution, run 
+```
+nextflow run main.nf --profile cluster
+```
+To run locally, remove `--profile cluster` parameter from the command. 
 
 ### Results 
-When the pipeline finishes, tool analysis table will be located in `data/label_analysis_output/` directory. 
+When the pipeline execution finishes, tool analysis table will be located in `data/label_analysis_output/` directory. 
 
 
 
