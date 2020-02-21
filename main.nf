@@ -113,7 +113,7 @@ if(params.data_download.run == "True"){
 if(params.garnett.run == "True"){
     process run_garnett_workflow {
         publishDir "${params.tool_outputs_dir}", mode: 'copy'
-        conda 'envs/nextflow.yaml'
+        conda "${baseDir}/envs/nextflow.yaml"
 
         errorStrategy { task.exitStatus == 130 || task.exitStatus == 137  ? 'retry' : 'finish' }   
         maxRetries 5
@@ -154,7 +154,7 @@ if(params.garnett.run == "True"){
 if(params.scmap_cell.run == "True"){ 
     process run_scmap_cell_workflow {
         publishDir "${params.tool_outputs_dir}", mode: 'copy'
-        conda 'envs/nextflow.yaml'
+        conda "${baseDir}/envs/nextflow.yaml"
 
         errorStrategy { task.exitStatus == 130 || task.exitStatus == 137  ? 'retry' : 'finish' }   
         maxRetries 5
@@ -195,7 +195,7 @@ if(params.scmap_cell.run == "True"){
 if(params.scmap_cluster.run == "True"){
     process run_scmap_cluster_workflow {
         publishDir "${params.tool_outputs_dir}", mode: 'copy'
-        conda 'envs/nextflow.yaml'
+        conda "${baseDir}/envs/nextflow.yaml"
 
         errorStrategy { task.exitStatus == 130 || task.exitStatus == 137  ? 'retry' : 'finish' }   
         maxRetries 5
@@ -235,7 +235,7 @@ if(params.scmap_cluster.run == "True"){
 if(params.scpred.run == "True"){
     process run_scpred_workflow {
         publishDir "${params.tool_outputs_dir}", mode: 'copy'
-        conda 'envs/nextflow.yaml'
+        conda "${baseDir}/envs/nextflow.yaml"
 
         errorStrategy { task.exitStatus == 130 || task.exitStatus == 137  ? 'retry' : 'finish' }   
         maxRetries 5
@@ -303,7 +303,7 @@ process combine_results{
 // run analysis of predicted labels 
 if(params.label_analysis.run == "True"){
     process run_label_analysis {
-        conda 'envs/nextflow.yaml' 
+        conda "${baseDir}/envs/nextflow.yaml"
         publishDir "${params.label_analysis.output_dir}", mode: 'copy'
 
         errorStrategy { task.exitStatus == 130 || task.exitStatus == 137  ? 'retry' : 'finish' }   
