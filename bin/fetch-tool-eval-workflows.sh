@@ -10,6 +10,6 @@ fi
 
 pushd $EVAL_WORKFLOWS > /dev/null
 git checkout $CONTROL_WORKFLOW_BRANCH > /dev/null
-git pull > /dev/null
-git submodule update > /dev/null
+git pull origin $CONTROL_WORKFLOW_BRANCH > /dev/null
+git submodule update --recursive --remote > /dev/null
 popd > /dev/null
