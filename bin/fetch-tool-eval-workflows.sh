@@ -9,7 +9,7 @@ if [ ! -d 'cell-types-eval-workflows' ]; then
 fi
 
 pushd $EVAL_WORKFLOWS > /dev/null
-git checkout develop > /dev/null
+git checkout origin/develop > /dev/null
 git pull origin develop > /dev/null
 git submodule update --recursive --remote > /dev/null
 popd > /dev/null
