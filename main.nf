@@ -136,6 +136,9 @@ if(params.garnett.run == "True"){
                             --ref_10x_dir ${reference_10X_dir}\
                             --query_10x_dir ${query_10X_dir}\
                             --marker_genes ${ref_marker_genes}\
+                            --pval-col ${params.garnett.pval_col}\
+                            --groups-col ${params.garnett.groups_col}\
+                            --gene-names ${params.garnett.gene_names}\
                             --ref_cds_gene_id_type ${params.garnett.ref_cds_gene_id_type}\
                             --query_cds_gene_id_type ${params.garnett.query_cds_gene_id_type}\
                             --database ${params.garnett.database}\
