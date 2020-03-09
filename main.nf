@@ -344,3 +344,5 @@ if(params.label_analysis.run == "True"){
         """
     }
 }
+#test_objects_tuple = Channel.map(file -> tuple(fileName.split("\\.")[1], file)
+#train_objects_tuple = Channel.map(file -> tuple(fileName.split("\\.")[1], file)
